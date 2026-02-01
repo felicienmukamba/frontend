@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Plus, Search, User, Mail, Phone, ShieldCheck, Database, Building2, Users } from 'lucide-react';
-import { useGetThirdPartiesQuery, useDeleteThirdPartyMutation } from '../api/resourcesApi';
+import { useGetThirdPartiesQuery, useDeleteThirdPartyMutation, useCreateThirdPartyMutation } from '../api/resourcesApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import React, { useState } from 'react';
@@ -27,6 +27,7 @@ import { ThirdPartyHistoryDialog } from './ThirdPartyHistoryDialog';
 import { ThirdParty, ThirdPartyType } from '../types';
 import { Input } from '@/components/ui/input';
 import { extractArray } from '@/lib/utils';
+import { ExcelImportButton } from '@/components/ui/ExcelImportButton';
 
 export const ThirdPartyList = ({ type }: { type?: ThirdPartyType }) => {
     const [search, setSearch] = useState('');
@@ -39,10 +40,12 @@ export const ThirdPartyList = ({ type }: { type?: ThirdPartyType }) => {
 
     const thirdParties = extractArray<ThirdParty>(data);
     const [deleteThirdParty] = useDeleteThirdPartyMutation();
+    const [createThirdParty] = useCreateThirdPartyMutation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedThirdParty, setSelectedThirdParty] = useState<ThirdParty | null>(null);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [historyThirdPartyId, setHistoryThirdPartyId] = useState<number | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
 
     const handleHistory = (id: number) => {
         setHistoryThirdPartyId(id);
@@ -67,6 +70,43 @@ export const ThirdPartyList = ({ type }: { type?: ThirdPartyType }) => {
             } catch (err) {
                 toast.error('Erreur lors de la suppression');
             }
+        }
+    };
+
+    const handleExcelImport = async (data: any[]) => {
+        setIsImporting(true);
+        const toastId = toast.loading("Importation des tiers en cours...");
+        let successCount = 0;
+        let errorCount = 0;
+
+        try {
+            for (const row of data) {
+                const payload = {
+                    name: String(row.name || row['Nom'] || row['Raison Sociale'] || ''),
+                    type: type || (row.type === 'SUPPLIER' || row['Type'] === 'FOURNISSEUR' ? ThirdPartyType.SUPPLIER : ThirdPartyType.CUSTOMER),
+                    email: String(row.email || row['Email'] || ''),
+                    phone: String(row.phone || row['Téléphone'] || ''),
+                    taxId: String(row.taxId || row['NIF'] || ''),
+                    rccm: String(row.rccm || row['RCCM'] || ''),
+                    address: String(row.address || row['Adresse'] || ''),
+                    isVatSubject: Boolean(row.isVatSubject || row['Assujetti TVA'] || false),
+                };
+
+                if (payload.name) {
+                    try {
+                        await createThirdParty(payload as any).unwrap();
+                        successCount++;
+                    } catch (e) {
+                        errorCount++;
+                    }
+                }
+            }
+
+            if (successCount > 0) toast.success(`${successCount} tiers importés.`, { id: toastId });
+            else if (errorCount > 0) toast.error(`${errorCount} échecs d'importation.`, { id: toastId });
+            else toast.dismiss(toastId);
+        } finally {
+            setIsImporting(false);
         }
     };
 
@@ -101,12 +141,42 @@ export const ThirdPartyList = ({ type }: { type?: ThirdPartyType }) => {
                     </h2>
                     <p className="text-slate-500 font-medium mt-1">Gérez vos relations et coordonnées {isSupplier ? 'fournisseurs' : 'clients'}.</p>
                 </div>
-                <Button
-                    className="h-12 px-6 rounded-xl bg-drc-blue hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
-                    onClick={handleCreate}
-                >
-                    <Plus className="mr-2 h-5 w-5" /> Nouveau {isSupplier ? 'Fournisseur' : 'Client'}
-                </Button>
+                <div className="flex items-center gap-3">
+                    <ExcelImportButton
+                        onImport={handleExcelImport}
+                        templateData={[
+                            {
+                                name: isSupplier ? 'SARL CONGO IMPORT' : 'ENTREPRISE ABC',
+                                type: isSupplier ? 'SUPPLIER' : 'CUSTOMER',
+                                email: isSupplier ? 'contact@congoimport.cd' : 'contact@abc.cd',
+                                phone: '+243810000000',
+                                taxId: 'A1234567X',
+                                rccm: 'CD/KIN/RCCM/12-A-12345',
+                                address: 'Kinshasa, RDC',
+                                isVatSubject: true
+                            },
+                            {
+                                name: isSupplier ? 'ETS KASAI TRADING' : 'CLIENT XYZ',
+                                type: isSupplier ? 'SUPPLIER' : 'CUSTOMER',
+                                email: isSupplier ? 'info@kasaitrading.cd' : 'info@xyz.cd',
+                                phone: '+243820000000',
+                                taxId: 'A7654321Y',
+                                rccm: 'CD/KIN/RCCM/12-B-54321',
+                                address: 'Lubumbashi, RDC',
+                                isVatSubject: false
+                            },
+                        ]}
+                        fileName={`Template_${isSupplier ? 'Fournisseurs' : 'Clients'}.xlsx`}
+                        label={`Importer ${isSupplier ? 'Fournisseurs' : 'Clients'}`}
+                        isLoading={isImporting}
+                    />
+                    <Button
+                        className="h-12 px-6 rounded-xl bg-drc-blue hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                        onClick={handleCreate}
+                    >
+                        <Plus className="mr-2 h-5 w-5" /> Nouveau {isSupplier ? 'Fournisseur' : 'Client'}
+                    </Button>
+                </div>
             </div>
 
             <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
