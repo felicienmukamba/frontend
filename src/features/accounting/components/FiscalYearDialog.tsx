@@ -26,7 +26,7 @@ import { Loader2 } from 'lucide-react';
 import {
     useCreateFiscalYearMutation,
     useUpdateFiscalYearMutation,
-} from '../api/accountingApi';
+} from '../api/fiscalYearsApi';
 import { FiscalYear, CreateFiscalYearDto } from '../types';
 import { useAuth } from '@/features/auth/lib/auth-provider';
 
@@ -82,20 +82,13 @@ export function FiscalYearDialog({ open, onOpenChange, fiscalYearToEdit }: Fisca
 
     const onSubmit = async (data: FiscalYearFormData) => {
         try {
-            if (!companyId) {
-                toast.error("Session invalide", {
-                    description: "Impossible de récupérer l'ID société. Veuillez vous reconnecter."
-                });
-                return;
-            }
-
             const payload: CreateFiscalYearDto = {
                 ...data,
-                companyId: Number(companyId),
+                // companyId is handled by backend
             };
 
             if (fiscalYearToEdit) {
-                await updateFiscalYear({ id: fiscalYearToEdit.id, ...payload }).unwrap();
+                await updateFiscalYear({ id: fiscalYearToEdit.id, data: payload }).unwrap();
                 toast.success('Exercice mis à jour');
             } else {
                 await createFiscalYear(payload).unwrap();

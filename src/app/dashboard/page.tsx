@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { extractArray } from '@/lib/utils';
 import { FiscalYear } from '@/features/dashboard/types';
-import { useGetFiscalYearsQuery } from '@/features/accounting/api/accountingApi';
+import { useGetFiscalYearsQuery } from '@/features/accounting/api/fiscalYearsApi';
 
 export default function DashboardPage() {
     const { user } = useAuth();

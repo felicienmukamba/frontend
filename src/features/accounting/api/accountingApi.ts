@@ -166,45 +166,7 @@ export const accountingApi = api.injectEndpoints({
             invalidatesTags: ['Journal'],
         }),
 
-        // Fiscal Years
-        getFiscalYears: builder.query<FiscalYearListResponse, void>({
-            query: () => '/fiscal-years',
-            providesTags: ['FiscalYear'],
-        }),
-        getFiscalYear: builder.query<FiscalYear, number>({
-            query: (id) => `/fiscal-years/${id}`,
-            providesTags: (result, error, id) => [{ type: 'FiscalYear', id }],
-        }),
-        createFiscalYear: builder.mutation<FiscalYear, CreateFiscalYearDto>({
-            query: (data) => ({
-                url: '/fiscal-years',
-                method: 'POST',
-                body: data,
-            }),
-            invalidatesTags: ['FiscalYear'],
-        }),
-        updateFiscalYear: builder.mutation<FiscalYear, UpdateFiscalYearDto>({
-            query: ({ id, ...data }) => ({
-                url: `/fiscal-years/${id}`,
-                method: 'PATCH',
-                body: data,
-            }),
-            invalidatesTags: (result, error, { id }) => ['FiscalYear', { type: 'FiscalYear', id }],
-        }),
-        deleteFiscalYear: builder.mutation<void, number>({
-            query: (id) => ({
-                url: `/fiscal-years/${id}`,
-                method: 'DELETE',
-            }),
-            invalidatesTags: ['FiscalYear'],
-        }),
-        closeFiscalYear: builder.mutation<FiscalYear, number>({
-            query: (id) => ({
-                url: `/fiscal-years/${id}/close`,
-                method: 'POST',
-            }),
-            invalidatesTags: ['FiscalYear'],
-        }),
+
 
         // Cost Centers
         getCostCenters: builder.query<CostCenterListResponse, void>({
@@ -261,8 +223,8 @@ export const accountingApi = api.injectEndpoints({
         getSixColumnBalance: builder.query<any, number>({
             query: (fiscalYearId) => `/accounting/reports/balance-6-columns/${fiscalYearId}`,
         }),
-        getAccountingDashboardStats: builder.query<any, { fiscalYearId: number; companyId: number }>({
-            query: ({ fiscalYearId, companyId }) => `/accounting/reports/dashboard/stats?fiscalYearId=${fiscalYearId}&companyId=${companyId}`,
+        getAccountingDashboardStats: builder.query<any, { fiscalYearId: number }>({
+            query: ({ fiscalYearId }) => `/accounting/reports/dashboard/stats?fiscalYearId=${fiscalYearId}`,
         }),
         getNotesAnnexes: builder.query<any, number>({
             query: (fiscalYearId) => `/accounting/reports/notes-annexes/${fiscalYearId}`,
@@ -292,12 +254,7 @@ export const {
     useCreateJournalMutation,
     useUpdateJournalMutation,
     useDeleteJournalMutation,
-    useGetFiscalYearsQuery,
-    useGetFiscalYearQuery,
-    useCreateFiscalYearMutation,
-    useUpdateFiscalYearMutation,
-    useDeleteFiscalYearMutation,
-    useCloseFiscalYearMutation,
+
     useGetCostCentersQuery,
     useGetCostCenterQuery,
     useCreateCostCenterMutation,

@@ -107,7 +107,7 @@ export const CostCenterList = () => {
                                 costCenters.map((cc) => (
                                     <TableRow key={cc.id}>
                                         <TableCell className="font-medium">{cc.code}</TableCell>
-                                        <TableCell>{cc.designation}</TableCell>
+                                        <TableCell>{cc.name}</TableCell>
                                         <TableCell>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

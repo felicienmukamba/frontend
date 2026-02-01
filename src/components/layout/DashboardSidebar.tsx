@@ -24,7 +24,8 @@ import {
     Activity,
     AppWindow,
     Truck,
-    Menu
+    Menu,
+    Calendar
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/lib/auth-provider';
 import { UserRole } from '@/features/auth/types';
@@ -76,6 +77,7 @@ const menuModules: SidebarModule[] = [
             { label: 'Écritures', href: '/accounting/entries', icon: Calculator },
             { label: 'Journaux', href: '/accounting/journals', icon: Activity },
             { label: 'États Financiers', href: '/accounting/reports', icon: PieChart },
+            { label: 'Exercices Fiscaux', href: '/accounting/fiscal-years', icon: Calendar },
         ],
     },
     {
@@ -84,6 +86,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.INVOICES_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.ADMIN_BRANCH, UserRole.GERANT, UserRole.CAISSIER],
         items: [
+            { label: 'Tableau de Bord', href: '/sales', icon: LayoutDashboard },
             { label: 'Factures', href: '/sales/invoices', icon: FileText },
             { label: 'Paiements', href: '/sales/payments', icon: DollarSign },
             { label: 'Clients', href: '/sales/customers', icon: Users },
@@ -96,6 +99,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.THIRD_PARTIES_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.GERANT, UserRole.COMPTABLE],
         items: [
+            { label: 'Tableau de Bord', href: '/purchases', icon: LayoutDashboard },
             { label: 'Commandes', href: '/procurement/purchase-orders', icon: FileText },
             { label: 'Réceptions', href: '/procurement/stock-receptions', icon: Truck },
         ],
@@ -106,6 +110,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.PRODUCTS_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.GERANT, UserRole.ADMIN_BRANCH],
         items: [
+            { label: 'Tableau de Bord', href: '/inventory', icon: LayoutDashboard },
             { label: 'Inventaire', href: '/resources/inventory', icon: Package },
         ],
     },
@@ -115,7 +120,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.HR_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.RH],
         items: [
-            { label: 'Employés', href: '/hr/employees', icon: Users },
+            { label: 'Tableau de Bord', href: '/hr', icon: LayoutDashboard }, { label: 'Employés', href: '/hr/employees', icon: Users },
             { label: 'Départements', href: '/hr/departments', icon: Briefcase },
             { label: 'Paie', href: '/hr/payroll', icon: DollarSign },
             { label: 'Congés', href: '/hr/leaves', icon: FileText },

@@ -44,3 +44,26 @@ function Badge({
 }
 
 export { Badge, badgeVariants }
+
+export function BadgeDRC({ children, variant = 'blue', className }: { children: React.ReactNode; variant?: 'blue' | 'yellow' | 'red' | 'green' | 'slate' | 'purple' | 'danger' | 'gray'; className?: string }) {
+  const styles: Record<string, string> = {
+    blue: "bg-blue-50 text-blue-700 border-blue-100 shadow-blue-500/5",
+    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200 shadow-yellow-500/5",
+    red: "bg-red-50 text-red-700 border-red-100 shadow-red-500/5",
+    green: "bg-emerald-50 text-emerald-700 border-emerald-100 shadow-emerald-500/5",
+    slate: "bg-slate-50 text-slate-600 border-slate-200 shadow-slate-500/5",
+    purple: "bg-indigo-50 text-indigo-700 border-indigo-100 shadow-indigo-500/5",
+    danger: "bg-red-50 text-red-600 border-red-100 shadow-red-500/5",
+    gray: "bg-slate-100 text-slate-600 border-slate-200",
+  };
+
+  return (
+    <span className={cn(
+      "inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm",
+      styles[variant] || styles.blue,
+      className
+    )}>
+      {children}
+    </span>
+  );
+}

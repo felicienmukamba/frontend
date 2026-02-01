@@ -77,16 +77,9 @@ export function JournalDialog({ open, onOpenChange, journalToEdit }: JournalDial
 
     const onSubmit = async (data: JournalFormData) => {
         try {
-            if (!companyId) {
-                toast.error("Session invalide", {
-                    description: "Impossible de récupérer l'ID société. Veuillez vous reconnecter."
-                });
-                return;
-            }
-
             const payload: CreateJournalDto = {
                 ...data,
-                companyId: Number(companyId),
+                // companyId is handled by backend
             };
 
             if (journalToEdit) {

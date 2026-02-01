@@ -1,26 +1,29 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useGetTrainingsQuery, useGetTrainingDomainsQuery } from '../api/hrApi';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
+    PremiumTable,
+    PremiumTableBody,
+    PremiumTableCell,
+    PremiumTableHead,
+    PremiumTableHeader,
+    PremiumTableRow,
+    BadgeDRC
+} from '@/components/ui/PremiumTable';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardDRC } from '@/components/ui/card';
 import {
     GraduationCap,
     Plus,
     Calendar,
     MapPin,
     BookOpen,
-    Users
+    Users,
+    Search,
+    Video
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -30,155 +33,176 @@ import { TrainingDialog } from './TrainingDialog';
 export const TrainingList = () => {
     const { data: trainings, isLoading: loadingTrainings } = useGetTrainingsQuery();
     const { data: domains, isLoading: loadingDomains } = useGetTrainingDomainsQuery();
-    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [search, setSearch] = useState('');
 
     const getStatusVariant = (status: string) => {
         switch (status) {
             case 'PLANNED':
-                return <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Planifié</Badge>;
+                return "blue";
             case 'IN_PROGRESS':
-                return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20">En cours</Badge>;
+                return "yellow";
             case 'COMPLETED':
-                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Terminé</Badge>;
+                return "green";
             case 'CANCELLED':
-                return <Badge className="bg-red-500/10 text-red-500 border-red-500/20">Annulé</Badge>;
+                return "red";
             default:
-                return <Badge variant="outline">{status}</Badge>;
+                return "slate";
         }
     };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'PLANNED': return 'Planifié';
+            case 'IN_PROGRESS': return 'En cours';
+            case 'COMPLETED': return 'Terminé';
+            case 'CANCELLED': return 'Annulé';
+            default: return status;
+        }
+    };
+
+    // Filter logic if needed
+    const filteredTrainings = trainings?.filter((t: any) =>
+        t.title.toLowerCase().includes(search.toLowerCase())
+    );
 
     if (loadingTrainings || loadingDomains) return <div className="p-8 text-center text-slate-500">Chargement des données...</div>;
 
     return (
-        <Tabs defaultValue="sessions" className="space-y-6">
+        <div className="space-y-6">
             <TrainingDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
-            <div className="flex justify-between items-center">
-                <TabsList className="bg-slate-900 border border-slate-800 p-1 rounded-xl">
-                    <TabsTrigger value="sessions" className="rounded-lg px-6 data-[state=active]:bg-purple-600 data-[state=active]:text-white transition-all">Sessions</TabsTrigger>
-                    <TabsTrigger value="domains" className="rounded-lg px-6 data-[state=active]:bg-purple-600 data-[state=active]:text-white transition-all">Domaines</TabsTrigger>
-                </TabsList>
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-black mb-4 uppercase tracking-[0.2em]">
+                        <div className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
+                        Développement Compétences
+                    </div>
+                    <h2 className="text-4xl font-black tracking-tight text-slate-900 font-outfit uppercase">Formation Continue</h2>
+                    <p className="text-slate-500 font-medium mt-1">Gérez le plan de formation et les sessions d'apprentissage.</p>
+                </div>
+                <Button
+                    className="h-12 px-6 rounded-xl bg-drc-blue hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                    onClick={() => setIsDialogOpen(true)}
+                >
+                    <Plus className="mr-2 h-5 w-5" /> Programmer une Session
+                </Button>
             </div>
 
-            <TabsContent value="sessions" className="space-y-4">
-                <Card className="border-slate-800/40 bg-slate-900/50 backdrop-blur-xl">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-xl font-bold text-white">Sessions de Formation</CardTitle>
-                        <Button
-                            className="bg-purple-600 hover:bg-purple-700 text-white"
-                            onClick={() => setIsDialogOpen(true)}
-                        >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Programmer une Session
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {trainings?.map((training: any) => (
-                                <Card key={training.id} className="bg-slate-800/20 border-slate-700/50 hover:bg-slate-800/40 transition-all group">
-                                    <CardContent className="p-5">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="space-y-1">
-                                                <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors uppercase tracking-tight">{training.title}</h3>
-                                                <p className="text-sm text-slate-400 font-medium">{training.domain?.name || 'Domaine Général'}</p>
-                                            </div>
-                                            {getStatusVariant(training.status)}
-                                        </div>
+            <Tabs defaultValue="sessions" className="space-y-6">
+                <TabsList className="bg-slate-100 p-1 rounded-xl w-auto inline-flex">
+                    <TabsTrigger value="sessions" className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-drc-blue data-[state=active]:shadow-sm font-bold transition-all">Sessions</TabsTrigger>
+                    <TabsTrigger value="domains" className="rounded-lg px-6 data-[state=active]:bg-white data-[state=active]:text-drc-blue data-[state=active]:shadow-sm font-bold transition-all">Domaines</TabsTrigger>
+                </TabsList>
 
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                                                <span>{format(new Date(training.startDate), 'dd MMM yyyy', { locale: fr })}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                <MapPin className="h-3.5 w-3.5 text-purple-500" />
-                                                <span>{training.location || 'Bureau'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                <Users className="h-3.5 w-3.5 text-purple-500" />
-                                                <span>Formateur: {training.trainer || 'N/A'}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-4 border-t border-slate-800/60 flex justify-between items-center">
-                                            <div className="flex -space-x-2">
-                                                {[1, 2, 3].map((i) => (
-                                                    <div key={i} className="h-7 w-7 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">
-                                                        U{i}
-                                                    </div>
-                                                ))}
-                                                <div className="h-7 w-7 rounded-full bg-purple-500/20 border-2 border-slate-900 flex items-center justify-center text-[10px] text-purple-400 font-bold">
-                                                    +5
-                                                </div>
-                                            </div>
-                                            <Button variant="link" className="text-purple-400 hover:text-purple-300 h-auto p-0 text-xs">
-                                                Voir les participants
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-
-                            {trainings?.length === 0 && (
-                                <div className="col-span-full py-12 text-center text-slate-500">
-                                    Aucune formation programmée.
-                                </div>
-                            )}
+                <TabsContent value="sessions" className="space-y-4">
+                    <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-4 py-2 mb-4">
+                            <div className="relative flex-1 max-w-sm group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-drc-blue transition-colors" />
+                                <Input
+                                    placeholder="Rechercher une formation..."
+                                    className="h-12 pl-12 rounded-xl bg-slate-50 border-transparent focus:bg-white focus:border-slate-100 transition-all font-medium"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </div>
                         </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
 
-            <TabsContent value="domains">
-                <Card className="border-slate-800/40 bg-slate-900/50 backdrop-blur-xl">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-xl font-bold text-white">Domaines de Formation</CardTitle>
-                        <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Ajouter un Domaine
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="border-slate-800 hover:bg-transparent">
-                                    <TableHead className="text-slate-400">Nom du Domaine</TableHead>
-                                    <TableHead className="text-slate-400">Description</TableHead>
-                                    <TableHead className="text-right text-slate-400">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {domains?.map((domain: any) => (
-                                    <TableRow key={domain.id} className="border-slate-800 hover:bg-slate-800/30">
-                                        <TableCell className="font-medium text-slate-200">
-                                            <div className="flex items-center gap-3">
-                                                <div className="bg-purple-500/10 p-2 rounded-lg">
-                                                    <BookOpen className="h-4 w-4 text-purple-400" />
+                        <div className="rounded-2xl border border-slate-50 overflow-hidden">
+                            <PremiumTable>
+                                <PremiumTableHeader>
+                                    <PremiumTableRow className="bg-slate-50/50">
+                                        <PremiumTableHead>Formation</PremiumTableHead>
+                                        <PremiumTableHead>Date & Lieu</PremiumTableHead>
+                                        <PremiumTableHead>Formateur</PremiumTableHead>
+                                        <PremiumTableHead>Statut</PremiumTableHead>
+                                        <PremiumTableHead className="text-right">Actions</PremiumTableHead>
+                                    </PremiumTableRow>
+                                </PremiumTableHeader>
+                                <PremiumTableBody>
+                                    {filteredTrainings?.map((training: any) => (
+                                        <PremiumTableRow key={training.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <PremiumTableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-10 w-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600">
+                                                        <GraduationCap className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-slate-900 uppercase">{training.title}</div>
+                                                        <div className="text-xs font-semibold text-slate-400">{training.domain?.name}</div>
+                                                    </div>
                                                 </div>
-                                                {domain.name}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-slate-400 text-sm">
-                                            {domain.description || 'N/A'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white">
-                                                Gérer
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {domains?.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={3} className="py-12 text-center text-slate-500 border-slate-800">
-                                            Aucun domaine enregistré.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
+                                            </PremiumTableCell>
+                                            <PremiumTableCell>
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                                                        <Calendar className="h-3 w-3 text-slate-400" />
+                                                        {format(new Date(training.startDate), 'dd MMM yyyy', { locale: fr })}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                                                        <MapPin className="h-3 w-3 text-slate-400" />
+                                                        {training.location || 'Local'}
+                                                    </div>
+                                                </div>
+                                            </PremiumTableCell>
+                                            <PremiumTableCell>
+                                                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                                    <Users className="h-4 w-4 text-slate-400" />
+                                                    {training.trainer || 'Non assigné'}
+                                                </div>
+                                            </PremiumTableCell>
+                                            <PremiumTableCell>
+                                                <BadgeDRC variant={getStatusVariant(training.status)}>
+                                                    {getStatusLabel(training.status)}
+                                                </BadgeDRC>
+                                            </PremiumTableCell>
+                                            <PremiumTableCell className="text-right">
+                                                <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-drc-blue hover:bg-blue-50">
+                                                    <Video className="h-4 w-4" />
+                                                </Button>
+                                            </PremiumTableCell>
+                                        </PremiumTableRow>
+                                    ))}
+                                    {filteredTrainings?.length === 0 && (
+                                        <PremiumTableRow>
+                                            <PremiumTableCell colSpan={5} className="text-center py-12 text-slate-400 italic">
+                                                Aucune formation trouvée.
+                                            </PremiumTableCell>
+                                        </PremiumTableRow>
+                                    )}
+                                </PremiumTableBody>
+                            </PremiumTable>
+                        </div>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="domains">
+                    <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-slate-900">Catalogue des Domaines</h3>
+                            <Button variant="outline" className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 font-bold">
+                                <Plus className="h-4 w-4 mr-2" /> Nouveau Domaine
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {domains?.map((domain: any) => (
+                                <CardDRC key={domain.id} className="p-4 hover:shadow-md transition-all border-slate-100 bg-slate-50/50">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-100">
+                                            <BookOpen className="h-5 w-5 text-purple-600" />
+                                        </div>
+                                        <div className="font-bold text-slate-900">{domain.name}</div>
+                                    </div>
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                        {domain.description || 'Aucune description disponible pour ce domaine de formation.'}
+                                    </p>
+                                </CardDRC>
+                            ))}
+                        </div>
+                    </div>
+                </TabsContent>
+            </Tabs>
+        </div>
     );
 };

@@ -50,7 +50,7 @@ export interface AccountingEntry {
 }
 
 export interface CreateAccountingEntryDto {
-    companyId: number;
+    companyId?: number;
     currency: string;
     exchangeRate: number;
     referenceNumber: string;
@@ -87,7 +87,7 @@ export interface Account {
 }
 
 export interface CreateAccountDto {
-    companyId: number;
+    companyId?: number;
     accountNumber: string;
     label: string;
     accountClass: number;
@@ -113,7 +113,7 @@ export interface Journal {
 }
 
 export interface CreateJournalDto {
-    companyId: number;
+    companyId?: number;
     code: string;
     label: string;
     description?: string;
@@ -135,7 +135,7 @@ export interface FiscalYear {
 }
 
 export interface CreateFiscalYearDto {
-    companyId: number;
+    companyId?: number;
     code: string;
     startDate: string;
     endDate: string;
@@ -148,16 +148,16 @@ export interface UpdateFiscalYearDto extends Partial<CreateFiscalYearDto> {
 export interface CostCenter {
     id: number;
     code: string;
-    designation: string;
+    name: string;
     companyId: number;
     createdAt?: string;
     updatedAt?: string;
 }
 
 export interface CreateCostCenterDto {
-    companyId: number;
+    companyId?: number;
     code: string;
-    designation: string;
+    name: string;
 }
 
 export interface UpdateCostCenterDto extends Partial<CreateCostCenterDto> {

@@ -32,7 +32,7 @@ import { useAuth } from '@/features/auth/lib/auth-provider';
 
 const costCenterSchema = z.object({
     code: z.string().min(1, 'Le code est requis'),
-    designation: z.string().min(1, 'La désignation est requise'),
+    name: z.string().min(1, 'La désignation est requise'),
 });
 
 type CostCenterFormData = z.infer<typeof costCenterSchema>;
@@ -52,7 +52,7 @@ export function CostCenterDialog({ open, onOpenChange, costCenterToEdit }: CostC
         resolver: zodResolver(costCenterSchema),
         defaultValues: {
             code: '',
-            designation: '',
+            name: '',
         },
     });
 
@@ -60,28 +60,21 @@ export function CostCenterDialog({ open, onOpenChange, costCenterToEdit }: CostC
         if (costCenterToEdit) {
             form.reset({
                 code: costCenterToEdit.code,
-                designation: costCenterToEdit.designation,
+                name: costCenterToEdit.name,
             });
         } else {
             form.reset({
                 code: '',
-                designation: '',
+                name: '',
             });
         }
     }, [costCenterToEdit, form]);
 
     const onSubmit = async (data: CostCenterFormData) => {
         try {
-            if (!companyId) {
-                toast.error("Session invalide", {
-                    description: "Impossible de récupérer l'ID société. Veuillez vous reconnecter."
-                });
-                return;
-            }
-
             const payload: CreateCostCenterDto = {
                 ...data,
-                companyId: Number(companyId),
+                // companyId is handled by backend
             };
 
             if (costCenterToEdit) {
@@ -123,7 +116,7 @@ export function CostCenterDialog({ open, onOpenChange, costCenterToEdit }: CostC
                         />
                         <FormField
                             control={form.control}
-                            name="designation"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Désignation *</FormLabel>

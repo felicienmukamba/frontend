@@ -93,16 +93,9 @@ export function AccountDialog({ open, onOpenChange, accountToEdit }: AccountDial
 
     const onSubmit = async (data: AccountFormData) => {
         try {
-            if (!companyId) {
-                toast.error("Session invalide", {
-                    description: "Impossible de récupérer l'ID société. Veuillez vous reconnecter."
-                });
-                return;
-            }
-
             const payload: CreateAccountDto = {
                 ...data,
-                companyId: Number(companyId),
+                // companyId is handled by backend
                 level: data.accountNumber.length,
             };
 

@@ -41,7 +41,8 @@ import {
     Shield,
     ShieldCheck as ShieldCheckIcon
 } from "lucide-react";
-import { useGetFiscalYearsQuery, useGetBalanceSheetQuery, useGetProfitAndLossQuery } from '../api/accountingApi';
+import { useGetBalanceSheetQuery, useGetProfitAndLossQuery } from '../api/accountingApi';
+import { useGetFiscalYearsQuery } from '../api/fiscalYearsApi';
 import { extractArray } from '@/lib/utils';
 import { FiscalYear } from '../types';
 import { TrialBalanceTable } from './TrialBalanceTable';

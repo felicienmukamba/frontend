@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,8 +29,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useCreatePayrollPeriodMutation } from '../api/hrApi';
+import { useGetActiveFiscalYearQuery } from '@/features/accounting/api/fiscalYearsApi';
 import { toast } from 'sonner';
-import { Loader2, Calendar } from 'lucide-react';
+import { Loader2, Calendar, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const payrollPeriodSchema = z.object({
     month: z.coerce.number().min(1).max(12),
@@ -43,6 +45,7 @@ type PayrollPeriodFormValues = z.infer<typeof payrollPeriodSchema>;
 interface PayrollPeriodDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onSuccess?: () => void;
 }
 
 const MONTHS = [
@@ -60,8 +63,9 @@ const MONTHS = [
     { value: 12, label: 'Décembre' },
 ];
 
-export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogProps) => {
+export const PayrollPeriodDialog = ({ open, onOpenChange, onSuccess }: PayrollPeriodDialogProps) => {
     const [createPeriod, { isLoading }] = useCreatePayrollPeriodMutation();
+    const { data: activeFiscalYear, isLoading: fiscalYearLoading } = useGetActiveFiscalYearQuery();
 
     const form = useForm<PayrollPeriodFormValues>({
         resolver: zodResolver(payrollPeriodSchema) as any,
@@ -72,14 +76,32 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
         },
     });
 
+    // Set year based on active fiscal year
+    useEffect(() => {
+        if (activeFiscalYear && open) {
+            const fyStart = new Date(activeFiscalYear.startDate);
+            const fyEnd = new Date(activeFiscalYear.endDate);
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+
+            // Default to current year if inside FY, else FY start year
+            if (currentYear >= fyStart.getFullYear() && currentYear <= fyEnd.getFullYear()) {
+                form.setValue('year', currentYear);
+            } else {
+                form.setValue('year', fyStart.getFullYear());
+            }
+        }
+    }, [activeFiscalYear, open, form]);
+
     const onSubmit = async (values: PayrollPeriodFormValues) => {
         try {
             await createPeriod(values).unwrap();
             toast.success('Période de paie ouverte avec succès');
+            onSuccess?.();
             onOpenChange(false);
             form.reset();
         } catch (error: any) {
-            toast.error(error?.data?.message || 'Erreur lors de louverture de la période');
+            toast.error(error?.data?.message || 'Erreur lors de l\'ouverture de la période');
         }
     };
 
@@ -96,6 +118,17 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
                         </DialogTitle>
                     </div>
                 </DialogHeader>
+
+                {!activeFiscalYear && !fiscalYearLoading && (
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Attention</AlertTitle>
+                        <AlertDescription>
+                            Aucun exercice fiscal actif. Veuillez en activer un d'abord.
+                        </AlertDescription>
+                    </Alert>
+                )}
+
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
@@ -110,7 +143,7 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
                                             defaultValue={field.value.toString()}
                                         >
                                             <FormControl>
-                                                <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium">
+                                                <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium focus:ring-purple-500">
                                                     <SelectValue placeholder="Choisir le mois" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -136,7 +169,7 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
                                             <Input
                                                 type="number"
                                                 {...field}
-                                                className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium"
+                                                className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium focus:visible:ring-purple-500"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -154,8 +187,8 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            placeholder="Ex: Paie Janvier 2024"
-                                            className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium"
+                                            placeholder="Ex: Paie Janvier 2026"
+                                            className="h-12 rounded-xl border-slate-200 bg-slate-50 font-medium focus-visible:ring-purple-500"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -163,19 +196,25 @@ export const PayrollPeriodDialog = ({ open, onOpenChange }: PayrollPeriodDialogP
                             )}
                         />
 
+                        {activeFiscalYear && (
+                            <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                Exercice actif : <strong>{activeFiscalYear.code}</strong> ({new Date(activeFiscalYear.startDate).getFullYear()} - {new Date(activeFiscalYear.endDate).getFullYear()})
+                            </div>
+                        )}
+
                         <DialogFooter>
                             <Button
                                 type="button"
                                 variant="ghost"
                                 onClick={() => onOpenChange(false)}
-                                className="h-12 rounded-xl text-slate-500 font-bold"
+                                className="h-12 rounded-xl text-slate-500 font-bold hover:bg-slate-100"
                             >
                                 Annuler
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading}
-                                className="h-12 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-lg shadow-purple-500/20"
+                                disabled={isLoading || !activeFiscalYear}
+                                className="h-12 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-purple-500/20 transition-all active:scale-95"
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Ouvrir Période

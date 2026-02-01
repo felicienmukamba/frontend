@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { useCreateAttendanceMutation, useGetEmployeesQuery } from '../api/hrApi';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Clock } from 'lucide-react';
 
 import { extractArray } from '@/lib/utils';
 const attendanceSchema = z.object({
@@ -85,9 +85,16 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-white">
+            <DialogContent className="max-w-md bg-white border-slate-100 shadow-2xl rounded-3xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold">Pointer une présence</DialogTitle>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="bg-blue-100 p-2 rounded-xl">
+                            <Clock className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <DialogTitle className="text-xl font-black font-outfit uppercase tracking-tight text-slate-900">
+                            Pointer une présence
+                        </DialogTitle>
+                    </div>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -96,14 +103,14 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
                             name="employeeId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Employé</FormLabel>
+                                    <FormLabel className="font-bold text-slate-700">Employé</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="bg-slate-800 border-slate-700">
+                                            <SelectTrigger className="bg-slate-50 border-slate-200 focus:ring-blue-500 rounded-xl">
                                                 <SelectValue placeholder="Choisir un employé" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                        <SelectContent className="bg-white border-slate-100 shadow-xl">
                                             {employees?.map((emp: any) => (
                                                 <SelectItem key={emp.id} value={emp.id}>
                                                     {emp.firstName} {emp.lastName}
@@ -121,9 +128,9 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
                             name="date"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Date</FormLabel>
+                                    <FormLabel className="font-bold text-slate-700">Date</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} className="bg-slate-800 border-slate-700" />
+                                        <Input type="date" {...field} className="bg-slate-50 border-slate-200 focus:ring-blue-500 rounded-xl" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -136,9 +143,9 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
                                 name="arrivalTime"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Heure d'arrivée</FormLabel>
+                                        <FormLabel className="font-bold text-slate-700">Heure d'arrivée</FormLabel>
                                         <FormControl>
-                                            <Input type="time" {...field} className="bg-slate-800 border-slate-700" />
+                                            <Input type="time" {...field} className="bg-slate-50 border-slate-200 focus:ring-blue-500 rounded-xl" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -149,9 +156,9 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
                                 name="departureTime"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Heure de départ</FormLabel>
+                                        <FormLabel className="font-bold text-slate-700">Heure de départ</FormLabel>
                                         <FormControl>
-                                            <Input type="time" {...field} className="bg-slate-800 border-slate-700" />
+                                            <Input type="time" {...field} className="bg-slate-50 border-slate-200 focus:ring-blue-500 rounded-xl" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -162,15 +169,15 @@ export const AttendanceDialog = ({ open, onOpenChange }: AttendanceDialogProps) 
                         <DialogFooter className="pt-4">
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="ghost"
                                 onClick={() => onOpenChange(false)}
-                                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                                className="border-transparent text-slate-500 hover:bg-slate-100 rounded-xl"
                             >
                                 Annuler
                             </Button>
                             <Button
                                 type="submit"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 rounded-xl"
                                 disabled={isCreating}
                             >
                                 {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

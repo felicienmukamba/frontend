@@ -90,3 +90,12 @@ export {
   CardDescription,
   CardContent,
 }
+
+export function CardDRC({ className, ...props }: React.ComponentProps<typeof Card>) {
+  return (
+    <Card
+      className={cn("border-0 shadow-lg rounded-2xl overflow-hidden", className)}
+      {...props}
+    />
+  )
+}

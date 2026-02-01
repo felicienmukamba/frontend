@@ -60,3 +60,13 @@ function Button({
 }
 
 export { Button, buttonVariants }
+
+export function ButtonDRC({ className, variant = 'default', ...props }: React.ComponentProps<typeof Button>) {
+  return (
+    <Button
+      variant={variant}
+      className={cn("font-bold shadow-lg transition-all active:scale-95", className)}
+      {...props}
+    />
+  )
+}

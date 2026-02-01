@@ -48,9 +48,9 @@ import {
     useCreateEntryMutation,
     useUpdateEntryMutation,
     useGetJournalsQuery,
-    useGetFiscalYearsQuery,
     useGetAccountsQuery,
 } from '../api/accountingApi';
+import { useGetFiscalYearsQuery } from '../api/fiscalYearsApi';
 import {
     AccountingEntry,
     EntryStatus,
@@ -175,18 +175,27 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
     const totalCredit = form.watch('entryLines').reduce((sum, line) => sum + (line.credit || 0), 0);
     const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
 
+    // Check if selected fiscal year is closed
+    const selectedFyId = form.watch('fiscalYearId');
+    const selectedFy = fiscalYears.find(f => f.id === selectedFyId);
+    const isFyClosed = selectedFy?.isClosed || false;
+
+    // Check if editing an entry from a closed fiscal year
+    const isEditingClosedEntry = entryToEdit ? fiscalYears.find(f => f.id === entryToEdit.fiscalYearId)?.isClosed : false;
+    const isReadOnly = isEditingClosedEntry || false;
+
     const onSubmit = async (data: EntryFormData) => {
         try {
-            if (!companyId) {
-                toast.error("Session invalide", {
-                    description: "Impossible de récupérer l'ID société. Veuillez vous reconnecter."
+            if (isFyClosed) {
+                toast.error("Exercice clôturé", {
+                    description: "Impossible de créer ou modifier une écriture sur un exercice clôturé."
                 });
                 return;
             }
 
             const payload: CreateAccountingEntryDto = {
                 ...data,
-                companyId: Number(companyId),
+                // companyId is now handled by the backend
                 createdById: user?.id || 1,
                 entryLines: data.entryLines.map(line => ({
                     debit: line.debit,
@@ -212,6 +221,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
     };
 
     const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+        if (isReadOnly) return;
         if (e.key === 'Enter' && index === fields.length - 1) {
             e.preventDefault();
             const diff = totalDebit - totalCredit;
@@ -233,11 +243,18 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
             <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0 gap-0">
                 <div className="p-6 border-b bg-slate-50/50">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-black uppercase tracking-tight">
+                        <DialogTitle className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
                             {entryToEdit ? 'Modifier écriture' : 'Nouvelle saisie comptable'}
+                            {isReadOnly && (
+                                <span className="px-3 py-1 rounded-full bg-red-100 text-red-600 text-[10px] font-bold uppercase tracking-widest border border-red-200">
+                                    Lecture Seule (Exercice Clôturé)
+                                </span>
+                            )}
                         </DialogTitle>
                         <DialogDescription className="font-medium text-slate-500">
-                            Enregistrez vos flux financiers. L'écriture doit être équilibrée pour être enregistrée.
+                            {isReadOnly
+                                ? "Cet exercice est clôturé. Aucune modification n'est permise."
+                                : "Enregistrez vos flux financiers. L'écriture doit être équilibrée pour être enregistrée."}
                         </DialogDescription>
                     </DialogHeader>
                 </div>
@@ -252,7 +269,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Référence</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder="OD-2024-001" className="h-10 bg-white border-slate-200 focus:ring-4 focus:ring-drc-blue/5 transition-all font-bold" />
+                                            <Input {...field} disabled={isReadOnly} placeholder="OD-2024-001" className="h-10 bg-white border-slate-200 focus:ring-4 focus:ring-drc-blue/5 transition-all font-bold" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -265,7 +282,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Date d'opération</FormLabel>
                                         <FormControl>
-                                            <Input {...field} type="date" className="h-10 bg-white border-slate-200 focus:ring-4 focus:ring-drc-blue/5 transition-all font-bold" />
+                                            <Input {...field} disabled={isReadOnly} type="date" className="h-10 bg-white border-slate-200 focus:ring-4 focus:ring-drc-blue/5 transition-all font-bold" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -277,7 +294,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Journal</FormLabel>
-                                        <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                                        <Select disabled={isReadOnly} onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                                             <FormControl>
                                                 <SelectTrigger className="h-10 bg-white border-slate-200 font-bold">
                                                     <SelectValue placeholder="Journal" />
@@ -301,7 +318,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Exercice</FormLabel>
-                                        <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                                        <Select disabled={isReadOnly} onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                                             <FormControl>
                                                 <SelectTrigger className="h-10 bg-white border-slate-200 font-bold">
                                                     <SelectValue placeholder="Exercice" />
@@ -328,7 +345,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                 <FormItem>
                                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Libellé général de l'écriture</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} placeholder="Décrire l'opération..." className="min-h-[80px] rounded-2xl bg-white border-slate-200 focus:ring-8 focus:ring-drc-blue/5 transition-all text-sm font-medium p-4" />
+                                        <Textarea {...field} disabled={isReadOnly} placeholder="Décrire l'opération..." className="min-h-[80px] rounded-2xl bg-white border-slate-200 focus:ring-8 focus:ring-drc-blue/5 transition-all text-sm font-medium p-4" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -348,8 +365,9 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                     type="button"
                                     variant="outline"
                                     size="sm"
+                                    disabled={isReadOnly}
                                     onClick={() => append({ debit: 0, credit: 0, description: form.getValues('description'), accountId: 0 })}
-                                    className="bg-white/10 hover:bg-white/20 text-white border-none rounded-xl font-bold h-9"
+                                    className="bg-white/10 hover:bg-white/20 text-white border-none rounded-xl font-bold h-9 disabled:opacity-50"
                                 >
                                     <Plus className="mr-2 h-4 w-4" /> Ajouter ligne
                                 </Button>
@@ -369,6 +387,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                                                 <Button
                                                                     variant="outline"
                                                                     role="combobox"
+                                                                    disabled={isReadOnly}
                                                                     className={cn(
                                                                         "w-full h-11 justify-between text-left font-bold border-slate-200 rounded-xl",
                                                                         !field.value && "text-slate-400 font-medium"
@@ -427,7 +446,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                             render={({ field }) => (
                                                 <FormItem className="col-span-4">
                                                     <FormControl>
-                                                        <Input {...field} placeholder="Libellé ligne" className="h-11 border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-slate-50" />
+                                                        <Input {...field} disabled={isReadOnly} placeholder="Libellé ligne" className="h-11 border-slate-200 rounded-xl font-medium focus:ring-4 focus:ring-slate-50" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -443,6 +462,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                                             {...field}
                                                             type="number"
                                                             step="0.01"
+                                                            disabled={isReadOnly}
                                                             className="h-11 border-slate-200 rounded-xl font-bold bg-emerald-50/30 text-emerald-700 text-right focus:bg-white transition-all"
                                                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                                         />
@@ -461,6 +481,7 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                                             {...field}
                                                             type="number"
                                                             step="0.01"
+                                                            disabled={isReadOnly}
                                                             className="h-11 border-slate-200 rounded-xl font-bold bg-orange-50/30 text-orange-700 text-right focus:bg-white transition-all"
                                                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                                                             onKeyDown={(e) => handleKeyDown(e, index)}
@@ -475,9 +496,9 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
-                                                disabled={fields.length <= 2}
+                                                disabled={isReadOnly || fields.length <= 2}
                                                 onClick={() => remove(index)}
-                                                className="h-8 w-8 p-0 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                className="h-8 w-8 p-0 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
@@ -520,23 +541,31 @@ export function EntryDialog({ open, onOpenChange, entryToEdit }: EntryDialogProp
                                     </div>
                                 )}
 
+                                {isFyClosed && !isReadOnly && (
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 text-red-400 text-xs font-black uppercase tracking-widest border border-red-500/20 animate-pulse">
+                                        <XCircle className="h-4 w-4" /> Exercice Clôturé
+                                    </div>
+                                )}
+
                                 <div className="flex gap-3 ml-4">
                                     <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl font-bold bg-white/5 hover:bg-white/10 text-white border-none">
-                                        Annuler
+                                        {isReadOnly ? 'Fermer' : 'Annuler'}
                                     </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={isCreating || isUpdating || !isBalanced}
-                                        className="h-12 px-8 rounded-xl bg-drc-blue hover:bg-blue-600 text-white font-black uppercase tracking-widest shadow-xl shadow-drc-blue/20 disabled:opacity-50 transition-all active:scale-95"
-                                    >
-                                        {(isCreating || isUpdating) ? (
-                                            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                                        ) : entryToEdit ? (
-                                            'Enregistrer modifications'
-                                        ) : (
-                                            'Enregistrer l\'écriture'
-                                        )}
-                                    </Button>
+                                    {!isReadOnly && (
+                                        <Button
+                                            type="submit"
+                                            disabled={isCreating || isUpdating || !isBalanced || isFyClosed}
+                                            className="h-12 px-8 rounded-xl bg-drc-blue hover:bg-blue-600 text-white font-black uppercase tracking-widest shadow-xl shadow-drc-blue/20 disabled:opacity-50 transition-all active:scale-95"
+                                        >
+                                            {(isCreating || isUpdating) ? (
+                                                <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                                            ) : entryToEdit ? (
+                                                'Enregistrer modifications'
+                                            ) : (
+                                                'Enregistrer l\'écriture'
+                                            )}
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </div>

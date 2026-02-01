@@ -29,7 +29,7 @@ import {
 } from '../api/budgetingApi';
 import { Budget, CreateBudgetDto } from '../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetFiscalYearsQuery } from '@/features/accounting/api/accountingApi';
+import { useGetFiscalYearsQuery } from '@/features/accounting/api/fiscalYearsApi';
 import { FiscalYear } from '@/features/accounting/types';
 import { extractArray } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,7 +54,7 @@ export function BudgetDialog({ open, onOpenChange, budgetToEdit }: BudgetDialogP
     const [createBudget, { isLoading: isCreating }] = useCreateBudgetMutation();
     const [updateBudget, { isLoading: isUpdating }] = useUpdateBudgetMutation();
     const { data: fiscalYearsData } = useGetFiscalYearsQuery();
-    const fiscalYears = (Array.isArray(fiscalYearsData) ? fiscalYearsData : fiscalYearsData?.data || []) as FiscalYear[];
+    const fiscalYears = extractArray<FiscalYear>(fiscalYearsData);
 
     const form = useForm<BudgetFormData>({
         resolver: zodResolver(budgetSchema),

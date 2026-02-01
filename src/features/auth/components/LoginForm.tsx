@@ -48,16 +48,14 @@ export const LoginForm = () => {
             });
             router.push('/dashboard');
         } catch (error: any) {
-            console.error('Login failed:', {
-                status: error.status,
-                data: error.data,
-                message: error.message || error.data?.message
-            });
-
             const errorCode = error.data?.code;
             const message = error.data?.message;
 
-            if (errorCode === 'COMPANY_INACTIVE') {
+            if (error.status === 'FETCH_ERROR') {
+                toast.error('Erreur de connexion', {
+                    description: "Impossible de joindre le serveur. Vérifiez votre connexion internet.",
+                });
+            } else if (errorCode === 'COMPANY_INACTIVE') {
                 toast.error('Entreprise non activée', {
                     description: message || "Votre entreprise est en attente de validation par l'administrateur.",
                 });

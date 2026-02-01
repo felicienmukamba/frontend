@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Department } from '../types';
 import { useCreateDepartmentMutation, useUpdateDepartmentMutation } from '../api/hrApi';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Briefcase, Loader2 } from 'lucide-react';
 
 const departmentSchema = z.object({
     name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -89,11 +89,16 @@ export const DepartmentDialog = ({ open, onOpenChange, department }: DepartmentD
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-white">
+            <DialogContent className="max-w-md bg-white border-slate-100 shadow-2xl rounded-3xl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold">
-                        {isEditing ? 'Modifier le département' : 'Nouveau département'}
-                    </DialogTitle>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="bg-purple-100 p-2 rounded-xl">
+                            <Briefcase className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <DialogTitle className="text-xl font-black font-outfit uppercase tracking-tight text-slate-900">
+                            {isEditing ? 'Modifier le département' : 'Nouveau département'}
+                        </DialogTitle>
+                    </div>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -102,9 +107,9 @@ export const DepartmentDialog = ({ open, onOpenChange, department }: DepartmentD
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Nom du département</FormLabel>
+                                    <FormLabel className="font-bold text-slate-700">Nom du département</FormLabel>
                                     <FormControl>
-                                        <Input {...field} className="bg-slate-800 border-slate-700" placeholder="ex: Comptabilité" />
+                                        <Input {...field} className="bg-slate-50 border-slate-200 focus:ring-purple-500 rounded-xl" placeholder="ex: Comptabilité" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -116,9 +121,9 @@ export const DepartmentDialog = ({ open, onOpenChange, department }: DepartmentD
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description</FormLabel>
+                                    <FormLabel className="font-bold text-slate-700">Description</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} className="bg-slate-800 border-slate-700 h-24" />
+                                        <Textarea {...field} className="bg-slate-50 border-slate-200 focus:ring-purple-500 rounded-xl h-24" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -128,15 +133,15 @@ export const DepartmentDialog = ({ open, onOpenChange, department }: DepartmentD
                         <DialogFooter className="pt-4">
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="ghost"
                                 onClick={() => onOpenChange(false)}
-                                className="border-slate-700 text-slate-300 hover:bg-slate-800"
+                                className="border-transparent text-slate-500 hover:bg-slate-100 rounded-xl"
                             >
                                 Annuler
                             </Button>
                             <Button
                                 type="submit"
-                                className="bg-purple-600 hover:bg-purple-700 text-white"
+                                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-purple-500/20 rounded-xl"
                                 disabled={isLoading}
                             >
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

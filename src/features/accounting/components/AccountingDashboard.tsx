@@ -23,9 +23,9 @@ import {
 } from 'lucide-react';
 import {
     useGetAccountingDashboardStatsQuery,
-    useGetFiscalYearsQuery,
     useGetJournalsQuery
 } from '../api/accountingApi';
+import { useGetFiscalYearsQuery } from '../api/fiscalYearsApi';
 import { useAuth } from '@/features/auth/lib/auth-provider';
 import { formatCurrency, extractArray } from '@/lib/utils';
 import { BadgeDRC } from '@/components/ui/PremiumTable';
@@ -34,6 +34,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EntryDialog } from './EntryDialog';
 import { Journal } from '../types';
+import { ComparisonCharts } from './ComparisonCharts';
 
 export function AccountingDashboard() {
     const { companyId } = useAuth();
@@ -43,7 +44,9 @@ export function AccountingDashboard() {
     const fiscalYears = extractArray<any>(fiscalYearsData);
     const journals = extractArray<Journal>(journalsData);
 
-    const activeFiscalYear = (fiscalYears as any[]).find((fy: any) => !fy.isClosed) || fiscalYears[0];
+    const activeFiscalYear = fiscalYears && fiscalYears.length > 0
+        ? ((fiscalYears as any[]).find((fy: any) => !fy.isClosed) || fiscalYears[0])
+        : null;
 
     const [selectedFiscalYearId, setSelectedFiscalYearId] = React.useState<number | null>(null);
     const [isEntryDialogOpen, setIsEntryDialogOpen] = React.useState(false);
@@ -78,11 +81,12 @@ export function AccountingDashboard() {
         }
     }, [activeFiscalYear, selectedFiscalYearId]);
 
-    const { data: stats, isLoading: isLoadingStats } = useGetAccountingDashboardStatsQuery(
-        { fiscalYearId: selectedFiscalYearId || activeFiscalYear?.id, companyId: Number(companyId) },
+    const { data: stats, isLoading: isLoadingStats, error } = useGetAccountingDashboardStatsQuery(
+        { fiscalYearId: selectedFiscalYearId || activeFiscalYear?.id },
         { skip: !activeFiscalYear && !selectedFiscalYearId }
     );
 
+    // Loading state
     if (isLoadingStats) {
         return (
             <div className="flex flex-col items-center justify-center py-32 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
@@ -92,7 +96,40 @@ export function AccountingDashboard() {
         );
     }
 
-    if (!stats) return null;
+    // Empty state - no fiscal years
+    if (!activeFiscalYear || !fiscalYears || fiscalYears.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
+                <div className="h-24 w-24 rounded-full bg-amber-50 flex items-center justify-center mb-6">
+                    <Calendar className="h-12 w-12 text-amber-500" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-2">Aucun Exercice Fiscal</h3>
+                <p className="text-slate-500 mb-6 text-center max-w-md">
+                    Veuillez créer un exercice fiscal pour accéder au tableau de bord financier.
+                </p>
+                <Button className="bg-drc-blue hover:bg-drc-blue/90">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Créer un Exercice Fiscal
+                </Button>
+            </div>
+        );
+    }
+
+    // Error or no stats
+    if (!stats || error) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
+                <div className="h-24 w-24 rounded-full bg-slate-100 flex items-center justify-center mb-6">
+                    <Activity className="h-12 w-12 text-slate-400" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-2">Données Indisponibles</h3>
+                <p className="text-slate-500 mb-6 text-center max-w-md">
+                    {error ? 'Erreur lors du chargement des statistiques.' : 'Aucune donnée disponible pour cet exercice fiscal.'}
+                </p>
+                <p className="text-xs text-slate-400">Exercice sélectionné: {activeFiscalYear?.code}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -251,7 +288,7 @@ export function AccountingDashboard() {
                                     <Target className="h-10 w-10" />
                                 </div>
                                 <div>
-                                    <h5 className="font-black uppercase text-sm tracking-tight">Objectif Fiscal {activeFiscalYear.code}</h5>
+                                    <h5 className="font-black uppercase text-sm tracking-tight">Objectif Fiscal {activeFiscalYear?.code}</h5>
                                     <p className="text-xs text-indigo-100 opacity-70 font-medium">Réduction des charges de structure de 5%</p>
                                 </div>
                             </div>
@@ -327,6 +364,9 @@ export function AccountingDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Comparison Charts */}
+            <ComparisonCharts fiscalYearIds={[selectedFiscalYearId || activeFiscalYear?.id]} />
 
             <EntryDialog
                 open={isEntryDialogOpen}
