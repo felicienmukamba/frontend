@@ -13,8 +13,11 @@ import {
 export const budgetingApi = api.injectEndpoints({
     endpoints: (builder) => ({
         // Budgets
-        getBudgets: builder.query<BudgetListResponse, void>({
-            query: () => '/budgeting',
+        getBudgets: builder.query<BudgetListResponse, { companyId?: number } | void>({
+            query: (params) => ({
+                url: '/budgeting',
+                params: params || {},
+            }),
             providesTags: ['Budget'],
         }),
         getBudget: builder.query<Budget, string>({

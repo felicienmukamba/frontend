@@ -357,7 +357,13 @@ export function InvoiceDialog({ open, onOpenChange, invoiceToEdit }: InvoiceDial
 
                 <div className="bg-white p-8 max-h-[80vh] overflow-y-auto custom-scrollbar">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                                console.error('Form validation errors:', errors);
+                                toast.error('Veuillez corriger les erreurs dans le formulaire');
+                            })}
+                            className="space-y-8"
+                        >
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-slate-50/50 p-6 rounded-3xl border border-slate-100/50">
                                 <FormField
                                     control={form.control as any}

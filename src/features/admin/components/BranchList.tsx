@@ -26,9 +26,15 @@ import { Branch } from '../types';
 import { BranchDialog } from './BranchDialog';
 import { extractArray } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/features/auth/lib/auth-provider';
 
 export const BranchList = () => {
-    const { data, isLoading, error } = useGetBranchesQuery({ page: 1, limit: 10 });
+    const { isSaaSAdmin, companyId } = useAuth();
+    const { data, isLoading, error } = useGetBranchesQuery({
+        page: 1,
+        limit: 10,
+        companyId: !isSaaSAdmin ? (companyId || undefined) : undefined
+    });
     const [deleteBranch] = useDeleteBranchMutation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);

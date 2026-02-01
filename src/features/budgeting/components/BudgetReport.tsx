@@ -1,18 +1,19 @@
 'use client';
 
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+    PremiumTable,
+    PremiumTableBody,
+    PremiumTableCell,
+    PremiumTableHead,
+    PremiumTableHeader,
+    PremiumTableRow,
+    BadgeDRC
+} from '@/components/ui/PremiumTable';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { BudgetExecution } from '../types';
 import { formatCurrency } from '@/lib/utils';
-import { AlertTriangle, TrendingDown, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, TrendingDown, TrendingUp, CheckCircle2, Target } from 'lucide-react';
 import { BudgetVsActualChart } from './BudgetVsActualChart';
 
 interface BudgetReportProps {
@@ -24,142 +25,135 @@ export const BudgetReport = ({ data, currency = 'USD' }: BudgetReportProps) => {
 
     const getVarianceColor = (variance: number, percentage: number) => {
         if (variance < 0) return 'text-red-600';
-        if (percentage > 90) return 'text-yellow-600';
-        return 'text-green-600';
+        if (percentage > 90) return 'text-amber-600';
+        return 'text-emerald-600';
     };
 
     const getProgressColor = (percentage: number) => {
-        if (percentage > 100) return 'bg-red-600';
-        if (percentage > 90) return 'bg-yellow-600';
-        return 'bg-green-600';
+        if (percentage > 100) return 'h-2 rounded-full bg-red-500';
+        if (percentage > 85) return 'h-2 rounded-full bg-amber-500';
+        return 'h-2 rounded-full bg-emerald-500';
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Budget Total Prévu</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="rounded-[2rem] border-none bg-slate-900 text-white shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                        <TrendingUp className="h-16 w-16" />
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Budget Total Prévu</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(data.totalPlanned, currency)}</div>
-                        <p className="text-xs text-muted-foreground">
-                            Objectif de dépenses
+                        <div className="text-3xl font-black font-outfit uppercase">{formatCurrency(data.totalPlanned, currency)}</div>
+                        <p className="text-[10px] text-slate-500 font-bold mt-2 uppercase tracking-wider">
+                            Objectif global de dépenses
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Réalisé (Dépensé)</CardTitle>
-                        <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                <Card className="rounded-[2rem] border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Réalisé (Dépensé)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(data.totalActual, currency)}</div>
-                        <Progress
-                            value={Math.min((data.totalActual / data.totalPlanned) * 100, 100)}
-                            className={`h-2 mt-2 ${getProgressColor((data.totalActual / data.totalPlanned) * 100)}`}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                            {((data.totalActual / data.totalPlanned) * 100).toFixed(1)}% du budget utilisé
+                        <div className="text-3xl font-black font-outfit text-slate-900 uppercase">{formatCurrency(data.totalActual, currency)}</div>
+                        <div className="w-full bg-slate-100 h-2 rounded-full mt-4 overflow-hidden">
+                            <div
+                                className={getProgressColor((data.totalActual / data.totalPlanned) * 100)}
+                                style={{ width: `${Math.min((data.totalActual / data.totalPlanned) * 100, 100)}%` }}
+
+                            />
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-bold mt-3 uppercase tracking-wider flex items-center justify-between">
+                            Absorption: <span>{((data.totalActual / data.totalPlanned) * 100).toFixed(1)}%</span>
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Solde Disponible</CardTitle>
-                        {data.variance < 0 ? <AlertTriangle className="h-4 w-4 text-red-500" /> : <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                <Card className={`rounded-[2rem] border-none shadow-2xl relative overflow-hidden group ${data.variance < 0 ? 'bg-red-50 text-red-900' : 'bg-emerald-50 text-emerald-900'}`}>
+                    <div className="absolute top-0 right-0 p-6 opacity-10">
+                        {data.variance < 0 ? <AlertTriangle className="h-16 w-16" /> : <CheckCircle2 className="h-16 w-16" />}
+                    </div>
+                    <CardHeader className="pb-2">
+                        <CardTitle className={`text-[10px] font-black uppercase tracking-[0.2em] ${data.variance < 0 ? 'text-red-400' : 'text-emerald-400'}`}>Solde Disponible</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className={`text-2xl font-bold ${data.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <div className="text-3xl font-black font-outfit uppercase">
                             {formatCurrency(data.variance, currency)}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                            {data.variance < 0 ? 'Dépassement budgétaire' : 'Reste à dépenser'}
+                        <p className="text-[10px] font-bold mt-2 uppercase tracking-wider">
+                            {data.variance < 0 ? 'Dépassement critique' : 'Reste à allouer/dépenser'}
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Chart Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BudgetVsActualChart data={data.details.map(d => ({
-                    name: d.accountLabel,
-                    budget: d.planned,
-                    actual: d.actual
-                }))} />
-            </div>
+            <BudgetVsActualChart data={data.details.map(d => ({
+                name: d.accountLabel,
+                budget: d.planned,
+                actual: d.actual
+            }))} />
 
             {/* Detailed Execution Table */}
-            <Card className="col-span-3">
-                <CardHeader>
-                    <CardTitle>Détails par Ligne Budgétaire</CardTitle>
-                    <CardDescription>
-                        Suivi détaillé des dépenses par compte comptable.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Compte</TableHead>
-                                <TableHead className="text-right">Prévision</TableHead>
-                                <TableHead className="text-right">Réalisation</TableHead>
-                                <TableHead className="text-right">Écart</TableHead>
-                                <TableHead className="text-right">% Utilisé</TableHead>
-                                <TableHead className="w-[100px]">Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.details.map((line) => (
-                                <TableRow key={line.accountId}>
-                                    <TableCell>
-                                        <div className="font-medium">{line.accountNumber}</div>
-                                        <div className="text-xs text-muted-foreground">{line.accountLabel}</div>
-                                    </TableCell>
-                                    <TableCell className="text-right font-medium">
-                                        {formatCurrency(line.planned, currency)}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {formatCurrency(line.actual, currency)}
-                                    </TableCell>
-                                    <TableCell className={`text-right font-bold ${line.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        {formatCurrency(line.variance, currency)}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <span className="text-xs font-medium">{line.variancePercentage.toFixed(1)}%</span>
-                                            <Progress
-                                                value={Math.min(line.variancePercentage, 100)}
-                                                className="w-16 h-2"
-                                            />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {line.variancePercentage > 100 ? (
-                                            <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Dépassement</span>
-                                        ) : line.variancePercentage > 85 ? (
-                                            <span className="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Attention</span>
-                                        ) : (
-                                            <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">OK</span>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {data.details.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                        Aucune ligne budgétaire définie.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div className="mb-6">
+                    <h3 className="text-lg font-black font-outfit uppercase tracking-tight text-slate-900">Analyse de Performance Budgétaire</h3>
+                    <p className="text-xs text-slate-500 font-medium">Suivi granulaire des écarts par imputation comptable.</p>
+                </div>
+
+                <PremiumTable>
+                    <PremiumTableHeader>
+                        <PremiumTableRow className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-none">
+                            <PremiumTableHead>Compte Imputation</PremiumTableHead>
+                            <PremiumTableHead className="text-right">Prévision</PremiumTableHead>
+                            <PremiumTableHead className="text-right">Réalisation</PremiumTableHead>
+                            <PremiumTableHead className="text-right">Écart Absolu</PremiumTableHead>
+                            <PremiumTableHead className="text-right">Statut</PremiumTableHead>
+                        </PremiumTableRow>
+                    </PremiumTableHeader>
+                    <PremiumTableBody>
+                        {data.details.map((line) => (
+                            <PremiumTableRow key={line.accountId} className="group transition-colors hover:bg-slate-50/50 border-slate-50">
+                                <PremiumTableCell className="py-4">
+                                    <div className="font-black text-slate-900 uppercase text-xs tracking-tight">{line.accountNumber}</div>
+                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{line.accountLabel}</div>
+                                </PremiumTableCell>
+                                <PremiumTableCell className="text-right font-bold text-slate-600 text-xs">
+                                    {formatCurrency(line.planned, currency)}
+                                </PremiumTableCell>
+                                <PremiumTableCell className="text-right font-black text-slate-900 text-xs">
+                                    {formatCurrency(line.actual, currency)}
+                                </PremiumTableCell>
+                                <PremiumTableCell className={`text-right font-black text-xs ${line.variance < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                    {formatCurrency(line.variance, currency)}
+                                    <div className="text-[10px] opacity-70">({line.variancePercentage.toFixed(1)}%)</div>
+                                </PremiumTableCell>
+                                <PremiumTableCell className="text-right">
+                                    {line.variancePercentage > 100 ? (
+                                        <BadgeDRC variant="red" className="animate-pulse">OVER-BUDGET</BadgeDRC>
+                                    ) : line.variancePercentage > 85 ? (
+                                        <BadgeDRC variant="yellow">CRITICAL</BadgeDRC>
+                                    ) : (
+                                        <BadgeDRC variant="blue">ON-TRACK</BadgeDRC>
+                                    )}
+                                </PremiumTableCell>
+                            </PremiumTableRow>
+                        ))}
+                        {data.details.length === 0 && (
+                            <PremiumTableRow>
+                                <PremiumTableCell colSpan={5} className="text-center py-24 text-slate-400 font-medium italic uppercase text-[10px] tracking-widest">
+                                    <Target className="h-10 w-10 mx-auto mb-4 opacity-5" />
+                                    Aucune donnée d'exécution disponible.
+                                </PremiumTableCell>
+                            </PremiumTableRow>
+                        )}
+                    </PremiumTableBody>
+                </PremiumTable>
+            </div>
         </div>
     );
 };

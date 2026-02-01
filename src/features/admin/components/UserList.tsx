@@ -28,9 +28,15 @@ import React, { useState } from 'react';
 import { UserDialog } from './UserDialog';
 import { User } from '@/features/auth/types';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/features/auth/lib/auth-provider';
 
 export const UserList = () => {
-    const { data, isLoading, error } = useGetUsersQuery({ page: 1, limit: 10 });
+    const { user: currentUser, isSaaSAdmin, companyId } = useAuth();
+    const { data, isLoading, error } = useGetUsersQuery({
+        page: 1,
+        limit: 10,
+        companyId: !isSaaSAdmin ? (companyId || undefined) : undefined
+    });
     const [deleteUser] = useDeleteUserMutation();
     const [updateUser] = useUpdateUserMutation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);

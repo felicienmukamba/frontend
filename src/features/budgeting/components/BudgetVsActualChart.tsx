@@ -12,46 +12,50 @@ export const BudgetVsActualChart = ({ data = [] }: BudgetVsActualChartProps) => 
     // Expected format: { name: 'Category', budget: 1000, actual: 800 }
 
     return (
-        <Card className="col-span-1 md:col-span-2">
-            <CardHeader>
-                <CardTitle>Comparaison Budget vs Réel</CardTitle>
+        <Card className="col-span-1 md:col-span-2 rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <CardHeader className="bg-slate-50/50 pb-2">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500 font-outfit">Comparaison Budget vs Réel</CardTitle>
             </CardHeader>
-            <CardContent className="pl-2">
+            <CardContent className="pt-6">
                 <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                         <XAxis
                             dataKey="name"
-                            stroke="#888888"
-                            fontSize={12}
+                            stroke="#94a3b8"
+                            fontSize={10}
                             tickLine={false}
                             axisLine={false}
+                            fontFamily="var(--font-outfit)"
+                            fontWeight={700}
                         />
                         <YAxis
-                            stroke="#888888"
-                            fontSize={12}
+                            stroke="#94a3b8"
+                            fontSize={10}
                             tickLine={false}
                             axisLine={false}
+                            fontFamily="var(--font-outfit)"
+                            fontWeight={700}
                             tickFormatter={(value) => `${value}`}
                         />
                         <Tooltip
-                            cursor={{ fill: 'transparent' }}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                            cursor={{ fill: '#f8fafc' }}
+                            contentStyle={{ borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', fontFamily: 'var(--font-outfit)', fontWeight: 700 }}
                         />
-                        <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontFamily: 'var(--font-outfit)', fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
                         <Bar
                             dataKey="budget"
                             name="Budget Alloué"
-                            fill="#9333ea"
+                            fill="#059669"
                             radius={[4, 4, 0, 0]}
-                            barSize={30}
+                            barSize={24}
                         />
                         <Bar
                             dataKey="actual"
                             name="Dépenses Réelles"
-                            fill="#ef4444"
+                            fill="#8b5cf6"
                             radius={[4, 4, 0, 0]}
-                            barSize={30}
+                            barSize={24}
                         />
                     </BarChart>
                 </ResponsiveContainer>

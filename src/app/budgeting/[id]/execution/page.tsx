@@ -4,7 +4,7 @@ import { useGetBudgetQuery, useGetBudgetExecutionQuery } from '@/features/budget
 import { BudgetReport } from '@/features/budgeting/components/BudgetReport';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw, Printer } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Printer, Target } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -87,27 +87,45 @@ function BudgetExecutionView({ params }: { params: Promise<{ id: string }> }) {
     }
 
     return (
-        <div className="container mx-auto py-6 space-y-6">
+        <div className="container mx-auto py-8 space-y-10">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <Button variant="ghost" size="icon" onClick={() => router.back()} className="-ml-2">
-                            <ArrowLeft className="h-4 w-4" />
+                    <div className="flex items-center gap-4 mb-4">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => router.back()}
+                            className="h-12 w-12 rounded-2xl border-slate-100 shadow-sm hover:bg-slate-50 active:scale-95 transition-all text-slate-400 hover:text-slate-900"
+                        >
+                            <ArrowLeft className="h-5 w-5" />
                         </Button>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exécution Budgétaire</h1>
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white text-[10px] font-black mb-2 uppercase tracking-[0.2em] shadow-lg shadow-slate-200">
+                                <Target className="h-3 w-3 text-emerald-400" />
+                                Monitor Executive
+                            </div>
+                            <h1 className="text-4xl font-black tracking-tight text-slate-900 font-outfit uppercase">Exécution Budgétaire</h1>
+                        </div>
                     </div>
-                    <p className="text-muted-foreground ml-10">
-                        Suivi en temps réel pour <span className="font-semibold text-foreground">{budget.name}</span> (Exercice: {budget.fiscalYear?.code})
+                    <p className="text-slate-500 font-medium ml-16">
+                        Analyse comparative pour <span className="font-black text-slate-900 uppercase">{budget.name}</span> <span className="mx-2 opacity-20">|</span> <span className="font-bold text-blue-600 px-2 py-1 bg-blue-50 rounded-lg">{budget.fiscalYear?.code}</span>
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={() => refetch()}>
-                        <RefreshCw className="mr-2 h-4 w-4" /> Actualiser
+                <div className="flex items-center gap-3 ml-16 md:ml-0">
+                    <Button
+                        variant="ghost"
+                        className="h-12 px-6 rounded-2xl font-black uppercase text-[10px] tracking-widest text-slate-500 hover:bg-slate-50"
+                        onClick={() => refetch()}
+                    >
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingExecution ? 'animate-spin' : ''}`} /> Actualiser les flux
                     </Button>
-                    <Button variant="outline" onClick={handlePrint}>
-                        <Printer className="mr-2 h-4 w-4" /> Imprimer
+                    <Button
+                        className="h-12 px-6 rounded-2xl bg-white border border-slate-100 shadow-sm font-black uppercase text-[10px] tracking-widest text-slate-900 hover:bg-slate-50 active:scale-95 transition-all"
+                        onClick={handlePrint}
+                    >
+                        <Printer className="mr-2 h-4 w-4" /> Export Rapport
                     </Button>
                 </div>
             </div>

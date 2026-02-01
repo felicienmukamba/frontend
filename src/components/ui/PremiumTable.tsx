@@ -88,7 +88,7 @@ export function PremiumTableCell({ children, className, ...props }: PremiumTable
     );
 }
 
-export function BadgeDRC({ children, variant = 'blue' }: { children: React.ReactNode; variant?: 'blue' | 'yellow' | 'red' | 'green' | 'slate' | 'purple' | 'danger' }) {
+export function BadgeDRC({ children, variant = 'blue', className }: { children: React.ReactNode; variant?: 'blue' | 'yellow' | 'red' | 'green' | 'slate' | 'purple' | 'danger'; className?: string }) {
     const styles = {
         blue: "bg-blue-50 text-drc-blue border-blue-100 shadow-blue-500/5",
         yellow: "bg-yellow-50 text-yellow-700 border-yellow-200 shadow-yellow-500/5",
@@ -102,7 +102,8 @@ export function BadgeDRC({ children, variant = 'blue' }: { children: React.React
     return (
         <span className={cn(
             "inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm",
-            styles[variant]
+            styles[variant],
+            className
         )}>
             {children}
         </span>

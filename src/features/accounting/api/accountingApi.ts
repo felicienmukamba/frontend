@@ -261,6 +261,12 @@ export const accountingApi = api.injectEndpoints({
         getSixColumnBalance: builder.query<any, number>({
             query: (fiscalYearId) => `/accounting/reports/balance-6-columns/${fiscalYearId}`,
         }),
+        getAccountingDashboardStats: builder.query<any, { fiscalYearId: number; companyId: number }>({
+            query: ({ fiscalYearId, companyId }) => `/accounting/reports/dashboard/stats?fiscalYearId=${fiscalYearId}&companyId=${companyId}`,
+        }),
+        getNotesAnnexes: builder.query<any, number>({
+            query: (fiscalYearId) => `/accounting/reports/notes-annexes/${fiscalYearId}`,
+        }),
     }),
 });
 
@@ -304,4 +310,6 @@ export const {
     useGetCashFlowQuery,
     useGetGeneralLedgerQuery,
     useGetSixColumnBalanceQuery,
+    useGetAccountingDashboardStatsQuery,
+    useGetNotesAnnexesQuery,
 } = accountingApi;

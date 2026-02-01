@@ -48,7 +48,11 @@ export const LoginForm = () => {
             });
             router.push('/dashboard');
         } catch (error: any) {
-            console.error('Login failed', error);
+            console.error('Login failed:', {
+                status: error.status,
+                data: error.data,
+                message: error.message || error.data?.message
+            });
 
             const errorCode = error.data?.code;
             const message = error.data?.message;
@@ -66,12 +70,12 @@ export const LoginForm = () => {
                     description: message || "Votre accès a été suspendu par un administrateur.",
                 });
             } else if (errorCode === 'INVALID_CREDENTIALS') {
-                toast.error('Échec de connexion', {
-                    description: "Email ou mot de passe incorrect.",
+                toast.error('Identification Échouée', {
+                    description: "Vos identifiants sont incorrects. Veuillez vérifier votre email et mot de passe.",
                 });
             } else {
-                toast.error('Erreur Système', {
-                    description: message || "Une erreur imprévue est survenue lors de la connexion.",
+                toast.error('Oups ! Un problème est survenu', {
+                    description: message || "Une erreur technique empêche la connexion. Nos équipes sont sur le coup.",
                 });
             }
         }

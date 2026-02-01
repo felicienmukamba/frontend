@@ -45,6 +45,11 @@ import { useGetFiscalYearsQuery, useGetBalanceSheetQuery, useGetProfitAndLossQue
 import { extractArray } from '@/lib/utils';
 import { FiscalYear } from '../types';
 import { TrialBalanceTable } from './TrialBalanceTable';
+import { SixColumnBalanceTable } from './SixColumnBalanceTable';
+import { CashFlowReport } from './CashFlowReport';
+import { VatReportViewer } from './VatReportViewer';
+import { NotesAnnexesViewer } from './NotesAnnexesViewer';
+import { GeneralLedgerViewer } from './GeneralLedgerViewer';
 import React, { useState } from 'react';
 
 // Placeholder for actual report components
@@ -174,6 +179,7 @@ export function AccountingReports() {
                         { id: 'cash-flow', label: 'CASH-FLOW', icon: Wallet },
                         { id: 'vat', label: 'TVA', icon: ShieldCheckIcon },
                         { id: 'general-ledger', label: 'GRAND LIVRE', icon: ArrowRightLeft },
+                        { id: 'notes-annexes', label: 'NOTES ANNEXES', icon: FileText },
                     ].map((tab) => (
                         <TabsTrigger
                             key={tab.id}
@@ -243,21 +249,47 @@ export function AccountingReports() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="trial-balance" className="mt-0 focus-visible:outline-none">
+                    <Tabs defaultValue="trial-4" className="w-full">
+                        <TabsList className="mb-6 bg-slate-50 p-1.5 rounded-xl border border-slate-100 h-auto">
+                            <TabsTrigger value="trial-4" className="rounded-lg px-4 py-2 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:shadow-sm">Balance 4 Colonnes</TabsTrigger>
+                            <TabsTrigger value="trial-6" className="rounded-lg px-4 py-2 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:shadow-sm">Balance 6 Colonnes (OHADA)</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="trial-4">
+                            {selectedFiscalYear ? (
+                                <TrialBalanceTable fiscalYearId={parseInt(selectedFiscalYear)} />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
+                                    <Search className="h-16 w-16 mb-4" />
+                                    <p className="text-lg font-black uppercase tracking-widest">Sélectionnez un exercice pour analyser</p>
+                                </div>
+                            )}
+                        </TabsContent>
+                        <TabsContent value="trial-6">
+                            {selectedFiscalYear ? (
+                                <SixColumnBalanceTable fiscalYearId={parseInt(selectedFiscalYear)} />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
+                                    <Search className="h-16 w-16 mb-4" />
+                                    <p className="text-lg font-black uppercase tracking-widest">Sélectionnez un exercice pour analyser</p>
+                                </div>
+                            )}
+                        </TabsContent>
+                    </Tabs>
+
+                    <TabsContent value="cash-flow" className="mt-0 focus-visible:outline-none">
                         <div className="mb-8 border-b border-slate-50 pb-8">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Balance de Vérification</h2>
-                                    <p className="text-slate-400 font-medium mt-1 uppercase text-xs tracking-widest">Récapitulatif exhaustif par compte</p>
+                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Tableau des Flux de Trésorerie</h2>
+                                    <p className="text-slate-400 font-medium mt-1 uppercase text-xs tracking-widest">Analyse Dynamique des Liquidités (TFT)</p>
                                 </div>
                                 <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center">
-                                    <BarChart3 className="h-7 w-7 text-slate-300" />
+                                    <Wallet className="h-7 w-7 text-slate-300" />
                                 </div>
                             </div>
                         </div>
-
                         {selectedFiscalYear ? (
-                            <TrialBalanceTable fiscalYearId={parseInt(selectedFiscalYear)} />
+                            <CashFlowReport fiscalYearId={parseInt(selectedFiscalYear)} />
                         ) : (
                             <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
                                 <Search className="h-16 w-16 mb-4" />
@@ -266,16 +298,71 @@ export function AccountingReports() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="cash-flow" className="mt-0 focus-visible:outline-none">
-                        <ReportPlaceholder name="Flux de Trésorerie" />
-                    </TabsContent>
-
                     <TabsContent value="vat" className="mt-0 focus-visible:outline-none">
-                        <ReportPlaceholder name="Déclaration Fiscalité" />
+                        <div className="mb-8 border-b border-slate-50 pb-8">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Situation Fiscale (TVA)</h2>
+                                    <p className="text-slate-400 font-medium mt-1 uppercase text-xs tracking-widest">DGI - Déclarations des Taxes sur la Valeur Ajoutée</p>
+                                </div>
+                                <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+                                    <ShieldCheckIcon className="h-7 w-7 text-slate-300" />
+                                </div>
+                            </div>
+                        </div>
+                        {selectedFiscalYear ? (
+                            <VatReportViewer fiscalYearId={parseInt(selectedFiscalYear)} />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
+                                <Search className="h-16 w-16 mb-4" />
+                                <p className="text-lg font-black uppercase tracking-widest">Sélectionnez un exercice pour analyser</p>
+                            </div>
+                        )}
                     </TabsContent>
 
                     <TabsContent value="general-ledger" className="mt-0 focus-visible:outline-none">
-                        <ReportPlaceholder name="Grand Livre Central" />
+                        <div className="mb-8 border-b border-slate-50 pb-8">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Grand Livre des Comptes</h2>
+                                    <p className="text-slate-400 font-medium mt-1 uppercase text-xs tracking-widest">Détail chronologique des opérations par compte</p>
+                                </div>
+                                <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+                                    <ArrowRightLeft className="h-7 w-7 text-slate-300" />
+                                </div>
+                            </div>
+                        </div>
+                        {selectedFiscalYear ? (
+                            <GeneralLedgerViewer fiscalYearId={parseInt(selectedFiscalYear)} />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
+                                <Search className="h-16 w-16 mb-4" />
+                                <p className="text-lg font-black uppercase tracking-widest">Sélectionnez un exercice pour analyser</p>
+                            </div>
+                        )}
+                    </TabsContent>
+
+                    {/* New TabsContent for Notes Annexes */}
+                    <TabsContent value="notes-annexes" className="mt-0 focus-visible:outline-none">
+                        <div className="mb-8 border-b border-slate-50 pb-8">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Notes Annexes</h2>
+                                    <p className="text-slate-400 font-medium mt-1 uppercase text-xs tracking-widest">Informations complémentaires aux états financiers</p>
+                                </div>
+                                <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+                                    <FileText className="h-7 w-7 text-slate-300" />
+                                </div>
+                            </div>
+                        </div>
+                        {selectedFiscalYear ? (
+                            <NotesAnnexesViewer fiscalYearId={parseInt(selectedFiscalYear)} />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-32 opacity-30 grayscale">
+                                <Search className="h-16 w-16 mb-4" />
+                                <p className="text-lg font-black uppercase tracking-widest">Sélectionnez un exercice pour analyser</p>
+                            </div>
+                        )}
                     </TabsContent>
                 </div>
             </Tabs>

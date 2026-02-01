@@ -24,9 +24,17 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { CompanyDialog } from './CompanyDialog';
 import { Company } from '@/features/admin/types';
+import { useAuth } from '@/features/auth/lib/auth-provider';
 
 export const CompanyList = () => {
-    const { data, isLoading, error } = useGetCompaniesQuery({ page: 1, limit: 10 });
+    const { isSaaSAdmin, companyId } = useAuth();
+    const { data, isLoading, error } = useGetCompaniesQuery({
+        page: 1,
+        limit: 10,
+        // For companies, filtering is usually done by showing ONLY the current company unless SaaS Admin
+        // However, the SaaS admin sees all. Let's pass companyId if it's restricted.
+        companyId: !isSaaSAdmin ? (companyId || undefined) : undefined
+    });
     const [deleteCompany] = useDeleteCompanyMutation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);

@@ -26,9 +26,15 @@ import { Role } from '@/features/auth/types';
 import { RoleDialog } from './RoleDialog';
 import { extractArray } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/features/auth/lib/auth-provider';
 
 export const RoleList = () => {
-    const { data, isLoading, error } = useGetRolesQuery({ page: 1, limit: 10 });
+    const { isSaaSAdmin, companyId } = useAuth();
+    const { data, isLoading, error } = useGetRolesQuery({
+        page: 1,
+        limit: 10,
+        companyId: !isSaaSAdmin ? (companyId || undefined) : undefined
+    });
     const [deleteRole] = useDeleteRoleMutation();
     const [duplicateRole] = useDuplicateRoleMutation();
     const [isDialogOpen, setIsDialogOpen] = useState(false);

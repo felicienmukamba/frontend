@@ -24,7 +24,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import {
+    Building,
+    Mail,
+    Phone,
+    Globe,
+    Loader2,
+    Briefcase
+} from 'lucide-react';
 
 interface CompanyDialogProps {
     open: boolean;
@@ -67,92 +74,127 @@ export function CompanyDialog({ open, onOpenChange, companyToEdit }: CompanyDial
     }, [companyToEdit, form]);
 
     async function onSubmit(data: CompanySchema) {
+        const toastId = toast.loading(companyToEdit ? 'Mise à jour...' : 'Création...');
         try {
             if (companyToEdit) {
                 await updateCompany({ id: companyToEdit.id, ...data }).unwrap();
-                toast.success('Entreprise mise à jour');
+                toast.success('Entreprise mise à jour', { id: toastId });
             } else {
                 await createCompany(data).unwrap();
-                toast.success('Entreprise créée');
+                toast.success('Entreprise créée', { id: toastId });
             }
             onOpenChange(false);
         } catch (error: any) {
-            toast.error('Erreur', { description: error.data?.message || 'Une erreur est survenue' });
+            toast.error('Erreur', { id: toastId, description: error.data?.message || 'Une erreur est survenue' });
         }
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>{companyToEdit ? 'Modifier entreprise' : 'Ajouter entreprise'}</DialogTitle>
-                    <DialogDescription>
-                        {companyToEdit ? 'Modifiez les informations ci-dessous.' : 'Renseignez les détails de la nouvelle entreprise.'}
-                    </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nom</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Téléphone</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="website"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Site Web</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end space-x-2">
-                            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>Annuler</Button>
-                            <Button type="submit" disabled={isLoading}>
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {companyToEdit ? 'Enregistrer' : 'Créer'}
-                            </Button>
+            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl rounded-[2rem]">
+                <div className="bg-slate-950 p-6 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(244,63,94,0.15)_0,transparent_70%)] opacity-50" />
+                    <DialogHeader className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="bg-rose-500/20 p-2 rounded-xl backdrop-blur-sm border border-rose-500/30">
+                                <Briefcase className="h-5 w-5 text-rose-400" />
+                            </div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 border border-slate-800 px-3 py-1 rounded-full bg-slate-900/50 backdrop-blur-md">
+                                Identité Corporate
+                            </div>
                         </div>
-                    </form>
-                </Form>
+                        <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tight">
+                            {companyToEdit ? 'Modifier Entreprise' : 'Nouvelle Entreprise'}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-400 font-medium text-xs">
+                            Paramètres légaux et informations de contact de l'entité.
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+
+                <div className="bg-white p-8">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-1">
+                                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Raison Sociale</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                                <Input {...field} placeholder="MILELE LTD" className="h-11 pl-10 rounded-xl border-slate-100 bg-slate-50/50 font-bold" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="text-[10px]" />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-1">
+                                            <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Email Officiel</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                                    <Input {...field} type="email" placeholder="contact@company.com" className="h-11 pl-10 rounded-xl border-slate-100 bg-slate-50/50 font-bold" />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-[10px]" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-1">
+                                            <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Ligne Directe</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                                    <Input {...field} placeholder="+243..." className="h-11 pl-10 rounded-xl border-slate-100 bg-slate-50/50 font-bold" />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-[10px]" />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="website"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-1">
+                                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Site Web (URL)</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                                <Input {...field} placeholder="https://milele.com" className="h-11 pl-10 rounded-xl border-slate-100 bg-slate-50/50 font-bold text-rose-600" />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="text-[10px]" />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <div className="flex justify-end gap-3 pt-4">
+                                <Button variant="ghost" type="button" onClick={() => onOpenChange(false)} className="rounded-xl font-black uppercase text-[10px] tracking-widest text-slate-400">
+                                    Annuler
+                                </Button>
+                                <Button type="submit" className="bg-rose-600 hover:bg-rose-700 rounded-xl px-10 h-11 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-rose-500/20 transition-all active:scale-95" disabled={isLoading}>
+                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (companyToEdit ? 'Mettre à jour' : 'Enregistrer')}
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </div>
             </DialogContent>
         </Dialog>
     );

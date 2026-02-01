@@ -12,7 +12,7 @@ import { User, Role } from '@/features/auth/types';
 
 export const adminApi = api.injectEndpoints({
     endpoints: (builder) => ({
-        getUsers: builder.query<UserListResponse, { page?: number; limit?: number }>({
+        getUsers: builder.query<UserListResponse, { page?: number; limit?: number; companyId?: number }>({
             query: (params) => ({
                 url: '/users',
                 params,
@@ -42,7 +42,7 @@ export const adminApi = api.injectEndpoints({
             }),
             invalidatesTags: ['User'],
         }),
-        getCompanies: builder.query<CompanyListResponse, { page?: number; limit?: number }>({
+        getCompanies: builder.query<CompanyListResponse, { page?: number; limit?: number; companyId?: number }>({
             query: (params) => ({
                 url: '/companies',
                 params,
@@ -73,7 +73,7 @@ export const adminApi = api.injectEndpoints({
             invalidatesTags: ['Company'],
         }),
         // Roles
-        getRoles: builder.query<RoleListResponse, { page?: number; limit?: number }>({
+        getRoles: builder.query<RoleListResponse, { page?: number; limit?: number; companyId?: number }>({
             query: (params) => ({
                 url: '/roles',
                 params,
@@ -111,7 +111,7 @@ export const adminApi = api.injectEndpoints({
             invalidatesTags: ['Role'],
         }),
         // Branches
-        getBranches: builder.query<BranchListResponse, { page?: number; limit?: number }>({
+        getBranches: builder.query<BranchListResponse, { page?: number; limit?: number; companyId?: number }>({
             query: (params) => ({
                 url: '/administration/branches',
                 params,

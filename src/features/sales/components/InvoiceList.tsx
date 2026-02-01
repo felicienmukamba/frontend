@@ -97,8 +97,9 @@ export const InvoiceList = () => {
             try {
                 await validateInvoice(id).unwrap();
                 toast.success('Facture validée avec succès');
-            } catch (err) {
-                toast.error('Erreur lors de la validation');
+            } catch (err: any) {
+                const errorMessage = err?.data?.message || 'Erreur lors de la validation';
+                toast.error(errorMessage);
             }
         }
     };

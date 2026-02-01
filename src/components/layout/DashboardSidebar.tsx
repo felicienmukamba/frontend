@@ -71,6 +71,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.ACCOUNTS_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.COMPTABLE, UserRole.DIRECTEUR_FINANCIER],
         items: [
+            { label: 'Tableau de Bord', href: '/accounting', icon: LayoutDashboard },
             { label: 'Plan Comptable', href: '/accounting/accounts', icon: BookOpen },
             { label: 'Écritures', href: '/accounting/entries', icon: Calculator },
             { label: 'Journaux', href: '/accounting/journals', icon: Activity },
@@ -106,7 +107,6 @@ const menuModules: SidebarModule[] = [
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.GERANT, UserRole.ADMIN_BRANCH],
         items: [
             { label: 'Inventaire', href: '/resources/inventory', icon: Package },
-            { label: 'Équipements', href: '/resources/equipment', icon: Briefcase },
         ],
     },
     {
@@ -143,7 +143,6 @@ const menuModules: SidebarModule[] = [
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY],
         items: [
             { label: 'DGI (Fiscalité)', href: '/dgi/taxes', icon: Percent },
-            { label: 'Synchronisation', href: '/sync/connections', icon: RefreshCw },
         ],
     },
     {
@@ -152,8 +151,7 @@ const menuModules: SidebarModule[] = [
         requiredPermission: PERMISSIONS.BUDGETS_READ,
         roles: [UserRole.SUPERADMIN, UserRole.ADMIN_COMPANY, UserRole.DIRECTEUR_FINANCIER, UserRole.COMPTABLE],
         items: [
-            { label: 'Budgets Annuels', href: '/budgeting/budgets', icon: Calculator },
-            { label: 'Suivi Budgétaire', href: '/budgeting/tracking', icon: Activity },
+            { label: 'Budgets Annuels', href: '/budgeting', icon: Calculator },
         ],
     },
     {
